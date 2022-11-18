@@ -2,6 +2,7 @@ package com.task.rabbitmqThreeQeues.configuration;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -32,7 +33,7 @@ public class RabbitMqConfiguration {
 
         return BindingBuilder.bind(queueA)
                 .to(exchange)
-                .with("routing.A");
+                .with("routing.B");
     }
 
     @Bean
@@ -60,4 +61,21 @@ public class RabbitMqConfiguration {
         rabbitTemplate.setMessageConverter(messageConverter());
         return rabbitTemplate;
     }
+
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(Queue queueB, ConnectionFactory connectionFactory) {
+        final DirectExchange exchange = new DirectExchange("exchange.direct");
+
+        final RabbitAdmin admin = new RabbitAdmin(connectionFactory);
+        admin.declareQueue(queueB);
+        admin.declareExchange(exchange);
+        admin.declareBinding(BindingBuilder.bind(queueB).to(exchange).with("routing.B"));
+
+        return admin;
+//        RabbitAdmin rabbitAdmin= new RabbitAdmin(connectionFactory);
+//        return rabbitAdmin;
+    }
+
+
 }
